@@ -19,6 +19,9 @@ dependencies:
   - python-dotenv
   - nltk
   - pip
+  - pip:
+    - transformers
+    - datasets
 
 
 prefix: /usr/local/anaconda3/envs/mloncode
