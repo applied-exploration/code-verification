@@ -18,6 +18,9 @@ dependencies:
   - wandb
   - python-dotenv
   - pip
+  - pip:
+    - transformers
+    - datasets
 
 
 prefix: /usr/local/anaconda3/envs/mloncode
