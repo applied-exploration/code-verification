@@ -1,0 +1,23 @@
+name: mloncode
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - black
+  - ipython
+  - notebook
+  - ipykernel
+  - pytorch=1.10.2
+  - tqdm
+  - numpy
+  - pandas
+  - pytest
+  - tensorboard
+  - torchmetrics
+  - pyright
+  - wandb
+  - python-dotenv
+  - pip
+
+
+prefix: /usr/local/anaconda3/envs/mloncode
