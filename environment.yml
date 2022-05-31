@@ -17,6 +17,7 @@ dependencies:
   - pyright
   - wandb
   - python-dotenv
+  - nltk
   - pip
 
 
