@@ -4,6 +4,7 @@ from utils.flatten import flatten
 from tqdm import tqdm
 from collections import Counter
 from typing import Tuple
+from pprint import PrettyPrinter
 
 def load_json(path: str) -> list[dict]:
     with open(path, 'r') as f:
@@ -19,4 +20,5 @@ def is_valid_ngram(ngram: Tuple) -> bool:
 grams = flatten([ngrams(d.split(),n=3) for d in tqdm(data)])
 grams = [ng for ng in grams if is_valid_ngram(ng)]
 
-print(Counter(grams).most_common(100))
+pprint = PrettyPrinter()
+pprint.pprint(Counter(grams).most_common(100))
