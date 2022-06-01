@@ -5,15 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run pipeline",
+            "name": "preprocess_features",
             "type": "python",
             "request": "launch",
             "module": "run_command",
             "args": [
-                "--epochs",
-                "5",
-                "--type",
-                "encoder"
+                // "--epochs",
+                // "5",
+                // "--type",
+                // "encoder"
             ]
         }
     ]
