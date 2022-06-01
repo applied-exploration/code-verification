@@ -21,6 +21,6 @@ dependencies:
   - pip
   - transformers
   - datasets
-
+  - mypy
 
 prefix: /usr/local/anaconda3/envs/mloncode
