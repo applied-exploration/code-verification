@@ -5,6 +5,7 @@ from torch.utils.data import Dataset
 from transformers import pipeline
 
 from utils.text_process import strip_comments
+from tqdm import tqdm
 
 
 class SourceCodeDataset(Dataset):
@@ -38,7 +39,7 @@ class SourceCodeDatasetRuntime(Dataset):
 
 
 def get_features(original: str, extractor) -> t.Tensor:
-    feature_tensors = [t.tensor(extractor(line)[0]) for line in original]
+    feature_tensors = [t.tensor(extractor(line)[0]) for line in tqdm(original)]
     features = pad_sequence(feature_tensors, batch_first=False)
     return features
 
