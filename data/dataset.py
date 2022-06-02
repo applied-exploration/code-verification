@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import torch as t
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
@@ -8,6 +9,8 @@ from config import PreprocessConfig
 
 from utils.text_process import strip_comments
 from tqdm import tqdm
+
+import copy
 
 
 class RawDataset(Dataset):
@@ -50,23 +53,20 @@ def preprocess_source(original: str) -> List[str]:
     return no_empty_lines
 
 
-def get_features_batched(df: pd.DataFrame, pipe, config: PreprocessConfig):
+def get_features_batched(source_code: str, pipe, config: PreprocessConfig):
 
-    all_source_dict = dict()
-    for idx in range(len(df)):
-        dataset = RawDataset(df.iloc[idx]["content"])
+    dataset = RawDataset(source_code)
 
-        feature_tensors = []
+    feature_tensors = []
 
-        # pipeline padding adds a unique padding token, that also gets passed into inference, hence we get a feature tensor for the padding tokens aswell.
-        for out in tqdm(
-            pipe(dataset, batch_size=config.batch_size, padding=True),
-            total=len(dataset),
-        ):
-            feature_tensors.append(t.tensor(out)[0])
+    # pipeline padding adds a unique padding token, that also gets passed into inference, hence we get a feature tensor for the padding tokens aswell.
+    for out in tqdm(
+        pipe(dataset, batch_size=config.batch_size, padding=True),
+        total=len(dataset),
+    ):
+        feature_tensors.append(t.tensor(out)[0])
 
-        # Shape is: num_lines | num_words in line | feature_length of word (token)
-        single_source_features = pad_sequence(feature_tensors, batch_first=True)
-        all_source_dict[idx] = single_source_features
+    # Shape is: num_lines | num_words in line | feature_length of word (token)
+    single_source_features = pad_sequence(feature_tensors, batch_first=True)
 
-    return all_source_dict
+    return single_source_features
