@@ -24,7 +24,7 @@ def run_preprocessing(config: PreprocessConfig):
         if i % config.save_every == 0:
             print(f"| Saving features to file...")
             t.save(feature_dict, f"data/temporary/features_{i}.pt")
-        elif i == len(df) - 1:
+        if i == len(df) - 1:
             t.save(feature_dict, "data/derived/features_all.pt")
 
     print("✅ Feature preprocessing done...")
