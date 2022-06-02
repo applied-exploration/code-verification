@@ -10,7 +10,16 @@ def run_preprocessing_batched(config: PreprocessConfig):
     print("| Running preprocessing...")
     df = pd.read_json("data/derived/python-pytorch.json")[: config.dataset_size]
 
-    get_features_batched(df)
+    print("| Converting original source to features...")
+    pipe = pipeline(
+        "feature-extraction", framework="pt", model="microsoft/codebert-base"
+    )
+    feature_dict = get_features_batched(df, pipe, config)
+
+    print("| Saving combined feature_dicts to disk...")
+    t.save(feature_dict, "data/derived/features_all.pt")
+
+    print("✅ Feature preprocessing done...")
 
 
 def run_preprocessing(config: PreprocessConfig):
@@ -20,7 +29,7 @@ def run_preprocessing(config: PreprocessConfig):
     print("| Loading Huggingface pipeline...")
     all_source = df["content"].to_numpy()
     extractor = pipeline(
-        "feature-extraction", framework="pt", model="distilbert-base-cased"
+        "feature-extraction", framework="pt", model="microsoft/codebert-base"
     )
 
     print("| Converting original source to features...")
