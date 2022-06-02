@@ -8,6 +8,9 @@ device = 0 if t.cuda.is_available() else -1
 
 
 def run_preprocessing(config: PreprocessConfig):
+    if config.force_cpu:
+        print("| Setting device to cpu...")
+        device = -1
     print("| Running preprocessing...")
     df = pd.read_json("data/derived/python-pytorch.json")[: config.dataset_size]
 
