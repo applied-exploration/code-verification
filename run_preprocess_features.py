@@ -1,33 +1,46 @@
 import pandas as pd
 from config import PreprocessConfig, preprocess_config
-from data.dataset import get_features, preprocess_source
+from data.dataset import get_features_batched
 from transformers import pipeline
-from tqdm import tqdm
 import torch as t
+
+device = 0 if t.cuda.is_available() else -1
 
 
 def run_preprocessing(config: PreprocessConfig):
+    if config.force_cpu:
+        print("| Setting device to cpu...")
+        device = -1
     print("| Running preprocessing...")
     df = pd.read_json("data/derived/python-pytorch.json")[: config.dataset_size]
 
-    print("| Loading Huggingface pipeline...")
-    all_source = df["content"].to_numpy()
-    extractor = pipeline(
-        "feature-extraction", framework="pt", model="distilbert-base-cased"
+    print("| Setting up pipeline...")
+    pipe = pipeline(
+        "feature-extraction",
+        framework="pt",
+        model="microsoft/codebert-base",
+        device=device,
     )
+    source_code_all = df["content"].to_numpy()
 
     print("| Converting original source to features...")
     feature_dict = dict()
-    for i, original in enumerate(tqdm(all_source)):
-        feature_dict[i] = get_features(preprocess_source(original), extractor)
+    for i in range(len(df)):
+        feature_dict[i] = get_features_batched(source_code_all[i], pipe, config)
 
         if i % config.save_every == 0:
             print(f"| Saving features to file...")
             t.save(feature_dict, f"data/temporary/features_{i}.pt")
+        if i == len(df) - 1:
+            t.save(feature_dict, "data/derived/features_all.pt")
 
+    print("✅ Feature preprocessing done...")
+
+
+def combine_temporary_preprocessed_features(num_files: int):
     print("| Combining features and saving to disk...")
     combined_dict = dict()
-    for i in range(len(all_source)):
+    for i in range(num_files):
         combined_dict.update(t.load(f"data/temporary/features_{i}.pt"))
 
     print("| Saving combined feature_dicts to disk...")
