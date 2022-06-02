@@ -128,11 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-.data/original/**
-data/original/
-
 codeparrot-clean/
 
-data/temporary/
+data/original/**
+data/temporary/**
 
-data/derived/
+

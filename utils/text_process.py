@@ -1,6 +1,4 @@
-
-
-def strip_comments(source:str)->str:
+def strip_comments(source: str) -> str:
     import pyparsing
 
     # commentFilter = pyparsing.cppStyleComment.suppress()
