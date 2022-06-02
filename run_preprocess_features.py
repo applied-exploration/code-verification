@@ -4,13 +4,14 @@ from data.dataset import get_features_batched
 from transformers import pipeline
 import torch as t
 
-device = 0 if t.cuda.is_available() else -1
-
 
 def run_preprocessing(config: PreprocessConfig):
+    device = 0 if t.cuda.is_available() else -1
+
     if config.force_cpu:
         print("| Setting device to cpu...")
         device = -1
+
     print("| Running preprocessing...")
     df = pd.read_json("data/derived/python-pytorch.json")[: config.dataset_size]
 
