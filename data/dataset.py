@@ -8,6 +8,17 @@ from utils.text_process import strip_comments
 from tqdm import tqdm
 
 
+class RawDataset(Dataset):
+    def __init__(self, all_code: pd.DataFrame):
+        self.all_code = all_code
+
+    def __len__(self):
+        return len(self.all_code)
+
+    def __getitem__(self, idx):
+        return preprocess_source(self.all_code.iloc[idx]["content"])
+
+
 class SourceCodeDataset(Dataset):
     def __init__(self, all_code: pd.DataFrame, all_features: dict):
         self.all_code = all_code
@@ -50,3 +61,13 @@ def preprocess_source(original: str) -> list[str]:
     no_empty_lines = [line for line in stripped_lines if line != ""]
 
     return no_empty_lines
+
+
+def get_features_batched(df: pd.DataFrame):
+    dataset = RawDataset(df)
+
+    pipe = pipeline(
+        "feature-extraction", framework="pt", device=0, model="distilbert-base-cased"
+    )
+    for out in tqdm(pipe(dataset, batch_size=64), total=len(dataset)):
+        print(out)

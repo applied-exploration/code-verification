@@ -1,9 +1,16 @@
 import pandas as pd
 from config import PreprocessConfig, preprocess_config
-from data.dataset import get_features, preprocess_source
+from data.dataset import get_features, preprocess_source, get_features_batched
 from transformers import pipeline
 from tqdm import tqdm
 import torch as t
+
+
+def run_preprocessing_batched(config: PreprocessConfig):
+    print("| Running preprocessing...")
+    df = pd.read_json("data/derived/python-pytorch.json")[: config.dataset_size]
+
+    get_features_batched(df)
 
 
 def run_preprocessing(config: PreprocessConfig):
@@ -37,4 +44,4 @@ def run_preprocessing(config: PreprocessConfig):
 
 
 if __name__ == "__main__":
-    run_preprocessing(preprocess_config)
+    run_preprocessing_batched(preprocess_config)
