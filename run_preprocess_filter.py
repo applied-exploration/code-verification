@@ -27,7 +27,7 @@ def run_filter_data():
         filtered_data = filtered_data + [d for d in data if filter_if(d)]
         print(len(filtered_data))
 
-    json.dump(filtered_data, open("data/derived/filtered-data.json", "w"))
+    json.dump(filtered_data, open("data/derived/python-pytorch.json", "w"))
 
 
 if __name__ == "__main__":
