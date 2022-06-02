@@ -8,4 +8,4 @@ class PreprocessConfig:
     batch_size: int
 
 
-preprocess_config = PreprocessConfig(save_every=1, dataset_size=2, batch_size=128)
+preprocess_config = PreprocessConfig(save_every=1, dataset_size=-1, batch_size=64)

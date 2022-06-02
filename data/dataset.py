@@ -39,12 +39,6 @@ class SourceCodeDataset(Dataset):
         return source_code, features
 
 
-def get_features(original: str, extractor) -> t.Tensor:
-    feature_tensors = [t.tensor(extractor(line)[0]) for line in tqdm(original)]
-    features = pad_sequence(feature_tensors, batch_first=False)
-    return features
-
-
 def preprocess_source(original: str) -> List[str]:
     split_by_line = original.split("\n")
     stripped_lines = [strip_comments(line) for line in split_by_line]
