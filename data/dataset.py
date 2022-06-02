@@ -10,8 +10,6 @@ from config import PreprocessConfig
 from utils.text_process import strip_comments
 from tqdm import tqdm
 
-import copy
-
 
 class RawDataset(Dataset):
     def __init__(self, single_code: str):

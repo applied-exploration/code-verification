@@ -2,8 +2,9 @@ import pandas as pd
 from config import PreprocessConfig, preprocess_config
 from data.dataset import get_features_batched
 from transformers import pipeline
-from tqdm import tqdm
 import torch as t
+
+device = 0 if t.cuda.is_available() else -1
 
 
 def run_preprocessing(config: PreprocessConfig):
@@ -12,7 +13,10 @@ def run_preprocessing(config: PreprocessConfig):
 
     print("| Setting up pipeline...")
     pipe = pipeline(
-        "feature-extraction", framework="pt", model="microsoft/codebert-base"
+        "feature-extraction",
+        framework="pt",
+        model="microsoft/codebert-base",
+        device=device,
     )
     source_code_all = df["content"].to_numpy()
 
