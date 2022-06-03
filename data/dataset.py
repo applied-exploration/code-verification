@@ -9,7 +9,6 @@ from config import PreprocessConfig
 from utils.text_process import strip_comments
 from tqdm import tqdm
 import re
-import math
 from typing import List
 
 
@@ -28,6 +27,9 @@ class RawDataset(Dataset):
 
     def __getitem__(self, idx):
         return self.sorted_lines[idx]
+
+    def get_sort_indecies(self):
+        return self.sorted_indecies
 
 
 class SourceCodeDataset(Dataset):
@@ -57,7 +59,6 @@ def preprocess_source(original: str) -> List[str]:
     return no_empty_lines
 
 
-
 def get_features_batched(source_code: str, pipe, config: PreprocessConfig):
 
     dataset = RawDataset(source_code)
@@ -65,8 +66,8 @@ def get_features_batched(source_code: str, pipe, config: PreprocessConfig):
     feature_tensors = []
 
     # pipeline padding adds a unique padding token, that also gets passed into inference, hence we get a feature tensor for the padding tokens aswell.
-    for i, out in tqdm(
-        enumerate(pipe(dataset, batch_size=config.batch_size, padding=True)),
+    for out in tqdm(
+        pipe(dataset, batch_size=config.batch_size, padding=True),
         total=len(dataset),
     ):
         # Shape is: num_lines | num_words in line | feature_length of word (token)
@@ -75,5 +76,9 @@ def get_features_batched(source_code: str, pipe, config: PreprocessConfig):
         feature_tensors.append(avaraged_features)
 
     single_source_features = pad_sequence(feature_tensors, batch_first=True)
+
+    if config.rearrange_order:
+        original_order = dataset.get_sort_indecies()
+        single_source_features = single_source_features[original_order]
 
     return single_source_features
