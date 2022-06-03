@@ -3,23 +3,33 @@ import numpy as np
 import torch as t
 from torch.nn.utils.rnn import pad_sequence
 from torch.utils.data import Dataset
-from transformers import pipeline
 from typing import List
 from config import PreprocessConfig
 
 from utils.text_process import strip_comments
 from tqdm import tqdm
+import re
+from typing import List
 
 
 class RawDataset(Dataset):
     def __init__(self, single_code: str):
         self.single_code = preprocess_source(single_code)
 
+        self.sorted_indecies = sorted(
+            range(len(self.single_code)), key=lambda k: len(self.single_code[k])
+        )
+
+        self.sorted_lines = np.array(self.single_code)[self.sorted_indecies]
+
     def __len__(self):
-        return len(self.single_code)
+        return len(self.sorted_lines)
 
     def __getitem__(self, idx):
-        return self.single_code[idx]
+        return self.sorted_lines[idx]
+
+    def get_sort_indecies(self):
+        return self.sorted_indecies
 
 
 class SourceCodeDataset(Dataset):
@@ -38,7 +48,11 @@ class SourceCodeDataset(Dataset):
 
 
 def preprocess_source(original: str) -> List[str]:
-    split_by_line = original.split("\n")
+    strip_tabs = re.sub(
+        r" +[\t]*", " ", original
+    )  # Strips tabs and multiple white spaces
+    split_by_line = strip_tabs.split("\n")
+
     stripped_lines = [strip_comments(line) for line in split_by_line]
     no_empty_lines = [line for line in stripped_lines if line != ""]
 
@@ -56,9 +70,15 @@ def get_features_batched(source_code: str, pipe, config: PreprocessConfig):
         pipe(dataset, batch_size=config.batch_size, padding=True),
         total=len(dataset),
     ):
-        feature_tensors.append(t.tensor(out)[0])
+        # Shape is: num_lines | num_words in line | feature_length of word (token)
+        out_tensor = t.tensor(out)[0]
+        avaraged_features = t.mean(out_tensor, dim=0, keepdim=False)
+        feature_tensors.append(avaraged_features)
 
-    # Shape is: num_lines | num_words in line | feature_length of word (token)
     single_source_features = pad_sequence(feature_tensors, batch_first=True)
+
+    if config.rearrange_to_original:
+        original_order = dataset.get_sort_indecies()
+        single_source_features = single_source_features[original_order]
 
     return single_source_features
