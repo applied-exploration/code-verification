@@ -41,12 +41,13 @@ def save_embeddings(embeddings_dict: dict):
     print("| Saving embeddings to disk...")
     t.save(embeddings_dict, "data/derived/embeddings_per_file.pt")
     id_map = []
-    embeddings = t.tensor([])
-    for file_key, lines in embeddings_dict:
-        for line_key, line_value in lines:
-            id_map.append((file_key, line_key))
-            embeddings = t.cat((embeddings, line_value[""]), dim=0)
-    t.save(embeddings, "data/derived/embeddings_flat.pt")
+    all_embeddings = t.tensor([])
+    for file_key, embeddings in embeddings_dict.items():
+        all_embeddings = t.cat((all_embeddings, embeddings), dim=0)
+        id_map.extend(
+            [(file_key, embedding_key) for embedding_key in range(0, len(embeddings))]
+        )
+    t.save(all_embeddings, "data/derived/embeddings_flat.pt")
     t.save(id_map, "data/derived/id_to_info_map.pt")
 
 
@@ -76,7 +77,6 @@ def run_extract_embeddings(config: PreprocessConfig):
         embeddings[i] = get_embeddings_batched(source_code_all[i], pipe, config)
 
         if i % config.save_every == 0:
-            print(f"| Saving embeddings to file...")
             save_embeddings(embeddings)
 
     print("✅ Feature preprocessing done...")
