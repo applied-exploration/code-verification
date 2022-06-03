@@ -8,14 +8,14 @@ class PreprocessConfig:
     batch_size: int
     force_cpu: bool
     dataset: str
-    rearrange_order:bool
+    rearrange_to_original: bool
 
 
 preprocess_config = PreprocessConfig(
     save_every=1,
-    dataset_size=5,
-    batch_size=8,
+    dataset_size=-1,
+    batch_size=16,
     force_cpu=True,
     dataset="python-pytorch",
-    rearrange_order=True
+    rearrange_to_original=True,
 )

@@ -77,7 +77,7 @@ def get_features_batched(source_code: str, pipe, config: PreprocessConfig):
 
     single_source_features = pad_sequence(feature_tensors, batch_first=True)
 
-    if config.rearrange_order:
+    if config.rearrange_to_original:
         original_order = dataset.get_sort_indecies()
         single_source_features = single_source_features[original_order]
 
