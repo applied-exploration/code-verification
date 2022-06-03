@@ -73,9 +73,13 @@ def get_features_batched(source_code: str, pipe, config: PreprocessConfig):
         # Shape is: num_lines | num_words in line | feature_length of word (token)
         out_tensor = t.tensor(out)[0]
         avaraged_features = t.mean(out_tensor, dim=0, keepdim=False)
+
         feature_tensors.append(avaraged_features)
 
-    single_source_features = pad_sequence(feature_tensors, batch_first=True)
+    if len(feature_tensors) > 0:
+        single_source_features = pad_sequence(feature_tensors, batch_first=True)
+    else:
+        single_source_features = t.empty(0)
 
     if config.rearrange_to_original:
         original_order = dataset.get_sort_indecies()
