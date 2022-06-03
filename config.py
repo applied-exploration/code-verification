@@ -12,8 +12,8 @@ class PreprocessConfig:
 
 preprocess_config = PreprocessConfig(
     save_every=1,
-    dataset_size=3,
-    batch_size=8,
+    dataset_size=-1,
+    batch_size=16,
     force_cpu=True,
-    dataset="python-pytorch-short",
+    dataset="python-pytorch",
 )
