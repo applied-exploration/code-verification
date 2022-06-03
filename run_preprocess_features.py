@@ -5,6 +5,11 @@ from transformers import pipeline
 import torch as t
 
 
+def shorten_dataset(config: PreprocessConfig):
+    df = pd.read_json("data/derived/python-pytorch.json")[2 : config.dataset_size + 2]
+    df.to_json("data/derived/python-pytorch-short.json")
+
+
 def run_preprocessing(config: PreprocessConfig):
     device = 0 if t.cuda.is_available() else -1
 
@@ -13,7 +18,7 @@ def run_preprocessing(config: PreprocessConfig):
         device = -1
 
     print("| Running preprocessing...")
-    df = pd.read_json("data/derived/python-pytorch.json")[: config.dataset_size]
+    df = pd.read_json(f"data/derived/{config.dataset}.json")[: config.dataset_size]
 
     print("| Setting up pipeline...")
     pipe = pipeline(
