@@ -5,16 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "preprocess_features",
+            "name": "run_extract_embeddings",
             "type": "python",
             "request": "launch",
             "module": "run_command",
-            "args": [
-                // "--epochs",
-                // "5",
-                // "--type",
-                // "encoder"
-            ]
+            "args": []
         }
     ]
 }
