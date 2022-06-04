@@ -1,10 +1,11 @@
 import pandas as pd
 from config import PreprocessConfig, preprocess_config
-from data.dataset import get_features_batched
-from transformers import FeatureExtractionPipeline, pipeline
+from data.dataset import get_embeddings_batched
+from transformers.pipelines import pipeline
+from transformers.pipelines.feature_extraction import FeatureExtractionPipeline
 import torch as t
-from transformers import BertTokenizer
 from typing import Dict
+from tqdm import tqdm
 
 
 def shorten_dataset(config: PreprocessConfig):
@@ -36,7 +37,21 @@ class MyPipeline(FeatureExtractionPipeline):
         return outputs
 
 
-def run_preprocessing(config: PreprocessConfig):
+def save_embeddings(embeddings_dict: dict):
+    print("| Saving embeddings to disk...")
+    t.save(embeddings_dict, "data/derived/embeddings_per_file.pt")
+    id_map = []
+    all_embeddings = t.tensor([])
+    for file_key, embeddings in embeddings_dict.items():
+        all_embeddings = t.cat((all_embeddings, embeddings), dim=0)
+        id_map.extend(
+            [(file_key, embedding_key) for embedding_key in range(0, len(embeddings))]
+        )
+    t.save(all_embeddings, "data/derived/embeddings_flat.pt")
+    t.save(id_map, "data/derived/id_to_info_map.pt")
+
+
+def run_extract_embeddings(config: PreprocessConfig):
     device = 0 if t.cuda.is_available() else -1
 
     if config.force_cpu:
@@ -56,31 +71,16 @@ def run_preprocessing(config: PreprocessConfig):
     )
     source_code_all = df["content"].to_numpy()
 
-    print("| Converting original source to features...")
-    feature_dict = dict()
-    for i in range(len(df)):
-        feature_dict[i] = get_features_batched(source_code_all[i], pipe, config)
+    print("| Converting original source to embeddings...")
+    embeddings = dict()
+    for i in tqdm(range(len(df))):
+        embeddings[i] = get_embeddings_batched(source_code_all[i], pipe, config)
 
         if i % config.save_every == 0:
-            print(f"| Saving features to file...")
-            t.save(feature_dict, f"data/temporary/features_{i}.pt")
-        if i == len(df) - 1:
-            t.save(feature_dict, "data/derived/features_all.pt")
-
-    print("✅ Feature preprocessing done...")
-
-
-def combine_temporary_preprocessed_features(num_files: int):
-    print("| Combining features and saving to disk...")
-    combined_dict = dict()
-    for i in range(num_files):
-        combined_dict.update(t.load(f"data/temporary/features_{i}.pt"))
-
-    print("| Saving combined feature_dicts to disk...")
-    t.save(combined_dict, "data/derived/features_all.pt")
+            save_embeddings(embeddings)
 
     print("✅ Feature preprocessing done...")
 
 
 if __name__ == "__main__":
-    run_preprocessing(preprocess_config)
+    run_extract_embeddings(preprocess_config)

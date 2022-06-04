@@ -131,8 +131,7 @@ dmypy.json
 codeparrot-clean/
 
 data/original/**
-data/temporary/**
 
-
-
-data/derived/features_all.pt
+data/derived/embeddings_flat.pt
+data/derived/id_to_info_map.pt
+data/derived/embeddings_per_file.pt

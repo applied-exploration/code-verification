@@ -5,8 +5,8 @@ from data.dataset import SourceCodeDataset
 
 def load_data():
     df = pd.read_json("data/derived/python-pytorch.json")
-    all_features = t.load("data/derived/features_all.pt")
+    all_embeddings = t.load("data/derived/embeddings_per_file.pt")
 
-    dataset = SourceCodeDataset(df, all_features)
+    dataset = SourceCodeDataset(df, all_embeddings)
 
     return dataset
