@@ -22,9 +22,7 @@ dependencies:
   - datasets
   - mypy
   - python-annoy
-  - scipy
+  - scikit-learn
   - pip
-  - pip:
-    - faiss-cpu
 
 prefix: /usr/local/anaconda3/envs/mloncode
