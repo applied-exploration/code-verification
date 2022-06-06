@@ -18,9 +18,11 @@ dependencies:
   - wandb
   - python-dotenv
   - nltk
-  - pip
   - transformers
   - datasets
   - mypy
+  - python-annoy
+  - scikit-learn
+  - pip
 
 prefix: /usr/local/anaconda3/envs/mloncode
