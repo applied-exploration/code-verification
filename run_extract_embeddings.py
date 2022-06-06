@@ -1,16 +1,12 @@
 import pandas as pd
 from config import PreprocessConfig, preprocess_config
-from data.dataset import get_embeddings_batched
+from data.dataset import RawDataset
 from transformers.pipelines import pipeline
 from transformers.pipelines.feature_extraction import FeatureExtractionPipeline
 import torch as t
-from typing import Dict
+from typing import Dict, List
+from torch.nn.utils.rnn import pad_sequence
 from tqdm import tqdm
-
-
-def shorten_dataset(config: PreprocessConfig):
-    df = pd.read_json("data/derived/python-pytorch.json")[2 : config.dataset_size + 2]
-    df.to_json("data/derived/python-pytorch-short.json")
 
 
 class MyPipeline(FeatureExtractionPipeline):
@@ -37,20 +33,6 @@ class MyPipeline(FeatureExtractionPipeline):
         return outputs
 
 
-def save_embeddings(embeddings_dict: dict):
-    print("| Saving embeddings to disk...")
-    t.save(embeddings_dict, "data/derived/embeddings_per_file.pt")
-    id_map = []
-    all_embeddings = t.tensor([])
-    for file_key, embeddings in embeddings_dict.items():
-        all_embeddings = t.cat((all_embeddings, embeddings), dim=0)
-        id_map.extend(
-            [(file_key, embedding_key) for embedding_key in range(0, len(embeddings))]
-        )
-    t.save(all_embeddings, "data/derived/embeddings_flat.pt")
-    t.save(id_map, "data/derived/id_to_info_map.pt")
-
-
 def run_extract_embeddings(config: PreprocessConfig):
     device = 0 if t.cuda.is_available() else -1
 
@@ -69,15 +51,27 @@ def run_extract_embeddings(config: PreprocessConfig):
         device=device,
         pipeline_class=MyPipeline,
     )
-    source_code_all = df["content"].to_numpy()
 
     print("| Converting original source to embeddings...")
-    embeddings = dict()
-    for i in tqdm(range(len(df))):
-        embeddings[i] = get_embeddings_batched(source_code_all[i], pipe, config)
+    dataset = RawDataset(df)
+    embeddings: List[t.Tensor] = []
 
-        if i % config.save_every == 0:
-            save_embeddings(embeddings)
+    # pipeline padding adds a unique padding token, that also gets passed into inference, hence we get a feature tensor for the padding tokens aswell.
+    for out in tqdm(
+        pipe(dataset, batch_size=config.batch_size, padding=True),
+        total=len(df),
+    ):
+        # Shape is: num_lines | num_words in line | feature_length of word (token)
+        out_tensor = t.tensor(out)[0]
+        avaraged_embeddings = t.mean(out_tensor, dim=0, keepdim=False)
+        embeddings.append(avaraged_embeddings)
+
+    embeddings = pad_sequence(embeddings, batch_first=True)
+
+    print("| Saving embeddings to disk...")
+    original_order = dataset.get_sort_indices()
+    embeddings = embeddings[original_order]
+    t.save(embeddings, "data/derived/embeddings_flat.pt")
 
     print("✅ Feature preprocessing done...")
 

@@ -1,6 +1,8 @@
 import json
 from tqdm import tqdm
 from typing import List
+from utils.text_process import preprocess_source_code
+from utils.json import load_json
 
 src_dir = "data/original"
 
@@ -15,19 +17,23 @@ def filter_if(d: dict) -> bool:
     )
 
 
-def load_json(path: str) -> List[dict]:
-    with open(path, "r") as f:
-        return [json.loads(line) for line in f]
-
-
 def run_filter_data():
-    filtered_data = []
-    for i in tqdm(range(1, 54)):
-        data = load_json(f"{src_dir}/file-0000000000{i:02d}.json")
-        filtered_data = filtered_data + [d for d in data if filter_if(d)]
-        print(len(filtered_data))
 
-    json.dump(filtered_data, open("data/derived/python-pytorch.json", "w"))
+    filtered_files = []
+    for i in tqdm(range(1, 54)):
+        files = load_json(f"{src_dir}/file-0000000000{i:02d}.json")
+        filtered_files = filtered_files + [f for f in files if filter_if(f)]
+
+    lines = []
+    for file in filtered_files:
+        lines.extend(
+            [
+                {"repo": file["repo_name"], "content": line, "path": file["path"]}
+                for line in preprocess_source_code(file["content"])
+            ]
+        )
+
+    json.dump(lines, open("data/derived/python-pytorch.json", "w"))
 
 
 if __name__ == "__main__":
