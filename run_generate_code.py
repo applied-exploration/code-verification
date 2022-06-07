@@ -26,15 +26,14 @@ for i, prompt in enumerate(prompts):
     print("-" * 20)
     print(f"{prompt}")
 
-    generated_code = []
-    for key, pipeline in pipelines.items():
-        prompt, generated_code = pipeline(prompts)
-        generated_code.append(generated_code)
+    generated_codes = [prompt] + [
+        pipeline(prompt)[0] for key, pipeline in pipelines.items()
+    ]
 
     table_name = prompt
-    columns = [key for key, item in pipelines.items()]
-    
-    rc.new_table(table_name, f'Prompt {i}')
+    columns = ["prompt"] + [key for key, item in pipelines.items()]
+
+    rc.new_table(table_name, f"Prompt {i}")
     rc.define_columns(table_name, columns)
-    rc.add_row_list_to_table(table_name, rows=generated_code)
-    rc.display()
+    rc.add_row_list_to_table(table_name, rows=[generated_codes])
+    rc.display(table_name)

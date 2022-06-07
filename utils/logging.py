@@ -11,7 +11,10 @@ class RichConsole:
 
     def new_table(self, table_name: str, title: str):
         self.tables[table_name] = Table(
-            show_header=True, header_style="bold magenta", title=title
+            show_header=True,
+            header_style="bold magenta",
+            title=title,
+            width=self.console.width,
         )
 
     def define_columns(self, table_name: str, column_names: List[str]):
@@ -25,6 +28,5 @@ class RichConsole:
         for row in rows:
             table.add_row(*row)
 
-    def display(self):
-        for key, table in self.tables.items():
-            self.console.print(table)
+    def display(self, table_name):
+        self.console.print(self.tables[table_name])

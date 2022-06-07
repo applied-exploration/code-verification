@@ -1,8 +1,3 @@
-# from autocomplete.gpt2_coder import GPT2Coder
-
-# m = GPT2Coder("shibing624/code-autocomplete-distilgpt2-python")
-# print(m.generate("import torch.nn as")[0])
-
 import os
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 from typing import List, Callable, Tuple
@@ -22,7 +17,10 @@ def gpt2_coder() -> Callable:
         input_ids = tokenizer.encode(
             prompt, add_special_tokens=False, return_tensors="pt"
         )
-        outputs = model.generate(
+
+        start = input_ids.size(1)
+
+        out = model.generate(
             input_ids=input_ids,
             max_length=64 + len(prompt),
             temperature=1.0,
@@ -34,7 +32,7 @@ def gpt2_coder() -> Callable:
             length_penalty=2.0,
             early_stopping=True,
         )
-        generated_code = tokenizer.decode(outputs[0], skip_special_tokens=True)
+        generated_code = tokenizer.decode(out[0][start:], skip_special_tokens=True)
 
         return prompt, generated_code
 
