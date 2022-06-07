@@ -23,6 +23,7 @@ dependencies:
   - mypy
   - python-annoy
   - scikit-learn
+  - pyparsing
   - pip
 
 prefix: /usr/local/anaconda3/envs/mloncode
