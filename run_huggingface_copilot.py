@@ -1,7 +1,7 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, FlaxAutoModelForCausalLM
 import torch as t
 
-device = 0 if t.cuda.is_available() else -1
+device = "cuda:0" if t.cuda.is_available() else "cpu"
 
 model = AutoModelForCausalLM.from_pretrained("flax-community/gpt-neo-125M-code-clippy")
 
