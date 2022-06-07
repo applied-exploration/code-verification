@@ -24,5 +24,6 @@ dependencies:
   - python-annoy
   - scikit-learn
   - pip
+  - rich
 
 prefix: /usr/local/anaconda3/envs/mloncode
