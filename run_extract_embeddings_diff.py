@@ -7,6 +7,7 @@ from torch.nn.utils.rnn import pad_sequence
 from tqdm import tqdm
 from extractors.pipeline import MyFeatureExtractionPipeline
 import torch as t
+from extractors.negative_cases import add_negative_cases
 
 
 def extract_embeddings_from_pipeline(
@@ -35,9 +36,11 @@ def run_extract_embeddings(config: PreprocessConfig):
         device = -1
 
     print("| Running preprocessing...")
-    df = pd.read_json(
-        f"data/original/TSSB-3M/file-0.jsonl.gz", lines=True, compression="gzip"
-    )[: config.dataset_size]
+    df = pd.read_json(f"data/original/TSSB-3M/file-0.jsonl", lines=True)[
+        : config.dataset_size
+    ]
+
+    df = add_negative_cases(df)
 
     print("| Setting up pipeline...")
     pipe = pipeline(
