@@ -10,14 +10,14 @@ import torch as t
 
 
 def extract_embeddings_from_pipeline(
-    pipe: Pipeline, dataset: RawDataset, batch_size: int
+    pipe: Pipeline, dataset: RawDataset, batch_size: int, length: int
 ) -> t.Tensor:
     # pipeline padding adds a unique padding token, that also gets passed into inference, hence we get a feature tensor for the padding tokens aswell.
     embeddings = [
         t.mean(t.tensor(out)[0], dim=0, keepdim=False)
         for out in tqdm(
             pipe(dataset, batch_size=batch_size, padding=True),
-            total=len(df),
+            total=length,
         )
     ]
 
@@ -50,10 +50,14 @@ def run_extract_embeddings(config: PreprocessConfig):
 
     print("| Converting original source to embeddings...")
     before_dataset = RawDataset(df, "before")
-    before_embeddings = extract_embeddings_from_pipeline(pipe, before_dataset, config.batch_size)
+    before_embeddings = extract_embeddings_from_pipeline(
+        pipe, before_dataset, config.batch_size, len(df)
+    )
 
     after_dataset = RawDataset(df, "after")
-    after_embeddings = extract_embeddings_from_pipeline(pipe, before_dataset, config.batch_size)
+    after_embeddings = extract_embeddings_from_pipeline(
+        pipe, after_dataset, config.batch_size, len(df)
+    )
 
     diff_embeddings = after_embeddings - before_embeddings
 
