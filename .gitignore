@@ -133,3 +133,7 @@ codeparrot-clean/
 data/original/**
 
 data/derived/embeddings_flat.pt
+
+data/derived/embeddings_per_file.pt
+
+data/derived/id_to_info_map.pt
