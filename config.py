@@ -15,3 +15,11 @@ preprocess_config = PreprocessConfig(
     force_cpu=True,
     dataset="python-pytorch",
 )
+
+@dataclass
+class ClassifyConfig:
+    force_cpu: bool
+    
+classify_config = ClassifyConfig(force_cpu=True)
+
+
