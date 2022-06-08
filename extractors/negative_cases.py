@@ -4,18 +4,14 @@ from sklearn.model_selection import train_test_split
 
 
 def add_negative_cases(df: pd.DataFrame) -> pd.DataFrame:
-    split_ratio = 0.5
-    print(f"| Splitting dataset by {split_ratio}")
-    positive, negative = train_test_split(
-        df, test_size=split_ratio, random_state=1, shuffle=True
-    )
-
-    print(f"| Copying after to before on negative rows...")
-    negative["before"] = negative["after"]
+    positive = df.copy()[["before"]]
+    negative = df.copy()[["after"]]
 
     print(f"| Adding labels to rows...")
-    negative["label"] = -1.0
+    negative["label"] = 0.0
+    negative = negative.rename(columns={"after": "source_code"})
     positive["label"] = 1.0
+    positive = positive.rename(columns={"before": "source_code"})
 
     print(f"| Combining and shuffling dataframe...")
     df = pd.concat([positive, negative])
