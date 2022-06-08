@@ -17,7 +17,7 @@ def filter_if(d: dict) -> bool:
     )
 
 
-def run_filter_data():
+def run_preprocess_filter_codeparrot():
 
     filtered_files = []
     for i in tqdm(range(1, 54)):
@@ -37,4 +37,4 @@ def run_filter_data():
 
 
 if __name__ == "__main__":
-    run_filter_data()
+    run_preprocess_filter_codeparrot()

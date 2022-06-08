@@ -2,35 +2,11 @@ import pandas as pd
 from config import PreprocessConfig, preprocess_config
 from data.dataset import RawDataset
 from transformers.pipelines import pipeline
-from transformers.pipelines.feature_extraction import FeatureExtractionPipeline
 import torch as t
-from typing import Dict, List
+from typing import List
 from torch.nn.utils.rnn import pad_sequence
 from tqdm import tqdm
-
-
-class MyPipeline(FeatureExtractionPipeline):
-    def preprocess(self, inputs, truncation=None) -> Dict[str, t.Tensor]:
-        return_tensors = self.framework
-
-        # tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-        model_inputs = self.tokenizer(inputs, return_tensors=return_tensors)
-
-        if hasattr(self, "input_tokenized_length") == False:
-            self.input_tokenized_length = []
-
-        self.input_tokenized_length.append(model_inputs["input_ids"].shape[1])
-
-        return model_inputs
-
-    def postprocess(self, model_outputs):
-        # [0] is the first available tensor, logits or last_hidden_state.
-        outputs = model_outputs[0].tolist()
-
-        for i, output in enumerate(outputs):
-            outputs[i] = output[: self.input_tokenized_length[i]]
-
-        return outputs
+from extractors.pipeline import MyFeatureExtractionPipeline
 
 
 def run_extract_embeddings(config: PreprocessConfig):
@@ -49,11 +25,11 @@ def run_extract_embeddings(config: PreprocessConfig):
         framework="pt",
         model="microsoft/codebert-base",
         device=device,
-        pipeline_class=MyPipeline,
+        pipeline_class=MyFeatureExtractionPipeline,
     )
 
     print("| Converting original source to embeddings...")
-    dataset = RawDataset(df)
+    dataset = RawDataset(df, "content")
     embeddings: List[t.Tensor] = []
 
     # pipeline padding adds a unique padding token, that also gets passed into inference, hence we get a feature tensor for the padding tokens aswell.
