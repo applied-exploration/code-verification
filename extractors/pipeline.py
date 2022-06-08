@@ -5,6 +5,7 @@ import torch as t
 
 class MyFeatureExtractionPipeline(FeatureExtractionPipeline):
     def preprocess(self, inputs, truncation=None) -> Dict[str, t.Tensor]:
+        print(self.tokenizer)
         return_tensors = self.framework
 
         model_inputs = self.tokenizer(inputs, return_tensors=return_tensors)
