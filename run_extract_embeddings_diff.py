@@ -48,12 +48,13 @@ def run_extract_embeddings(config: PreprocessConfig):
         pipeline_class=MyFeatureExtractionPipeline,
     )
 
-    print("| Converting original source to embeddings...")
+    print("| Converting the 'before commit state' to embeddings...")
     before_dataset = RawDataset(df, "before")
     before_embeddings = extract_embeddings_from_pipeline(
         pipe, before_dataset, config.batch_size, len(df)
     )
 
+    print("| Converting the 'after commit state' to embeddings...")
     after_dataset = RawDataset(df, "after")
     after_embeddings = extract_embeddings_from_pipeline(
         pipe, after_dataset, config.batch_size, len(df)

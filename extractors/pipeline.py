@@ -7,7 +7,7 @@ class MyFeatureExtractionPipeline(FeatureExtractionPipeline):
     def preprocess(self, inputs, truncation=None) -> Dict[str, t.Tensor]:
         return_tensors = self.framework
 
-        model_inputs = self.tokenizer(inputs, return_tensors=return_tensors)
+        model_inputs = self.tokenizer(inputs, return_tensors=return_tensors, truncation=True)
 
         if hasattr(self, "input_tokenized_length") == False:
             self.input_tokenized_length = []
