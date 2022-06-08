@@ -25,5 +25,6 @@ dependencies:
   - scikit-learn
   - pyparsing
   - pip
+  - rich
 
 prefix: /usr/local/anaconda3/envs/mloncode
