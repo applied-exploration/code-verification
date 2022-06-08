@@ -7,7 +7,7 @@ from torch.nn.utils.rnn import pad_sequence
 from tqdm import tqdm
 from extractors.pipeline import MyFeatureExtractionPipeline
 import torch as t
-from extractors.negative_cases import add_negative_cases
+from extractors.split_utils import add_negative_cases
 from data.data_loader import load_data
 
 
