@@ -5,8 +5,8 @@ from typing import Tuple
 
 
 def add_negative_cases(df: pd.DataFrame) -> pd.DataFrame:
-    positive = df.copy()[["before"]]
-    negative = df.copy()[["after"]]
+    positive = df[["before"]]
+    negative = df[["after"]]
 
     print(f"| Adding labels to rows...")
     negative["label"] = 0.0
@@ -17,7 +17,6 @@ def add_negative_cases(df: pd.DataFrame) -> pd.DataFrame:
     print(f"| Combining and shuffling dataframe...")
     df = pd.concat([positive, negative])
 
-    df = df.iloc[np.random.permutation(len(df))]
     return df
 
 
@@ -28,7 +27,9 @@ def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFra
     test_ratio = 0.1
     val_ratio = 0.1
     train, val_test = train_test_split(df, test_size=test_ratio + val_ratio)
-    val, test = train_test_split(val_test, test_size=test_ratio)
+    val, test = train_test_split(
+        val_test, test_size=test_ratio / (test_ratio + val_ratio)
+    )
 
     train = train.reset_index(drop=True)
     val = val.reset_index(drop=True)

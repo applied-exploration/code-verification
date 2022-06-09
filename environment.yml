@@ -26,6 +26,5 @@ dependencies:
   - pyparsing
   - pip
   - rich
-  - sklearn
 
 prefix: /usr/local/anaconda3/envs/mloncode

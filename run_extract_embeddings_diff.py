@@ -37,7 +37,6 @@ def run_extract_embeddings(config: PreprocessConfig):
         device = -1
 
     df = load_data(config)
-    df = add_negative_cases(df)
 
     print("| Setting up pipeline...")
     pipe = pipeline(

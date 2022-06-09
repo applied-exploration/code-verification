@@ -7,7 +7,15 @@ from transformers import (
     TrainingArguments,
     Trainer,
 )
-from datasets import load_metric, load_dataset, Dataset, Features, Value, ClassLabel
+from datasets import (
+    load_metric,
+    load_dataset,
+    Dataset,
+    Features,
+    Value,
+    ClassLabel,
+    list_metrics,
+)
 import numpy as np
 from typing import Tuple
 
@@ -24,8 +32,12 @@ def preporcess_dataset(preprocess_config: PreprocessConfig) -> Tuple[Dataset, Da
     val_dataset = Dataset.from_pandas(
         val, features=Features({"source_code": Value("string"), "label": ClassLabel(2)})
     )
+    test_dataset = Dataset.from_pandas(
+        test,
+        features=Features({"source_code": Value("string"), "label": ClassLabel(2)}),
+    )
 
-    return train_dataset, val_dataset
+    return train_dataset, val_dataset, test_dataset
 
 
 def train_classifier(preprocess_config: PreprocessConfig):
@@ -42,9 +54,6 @@ def train_classifier(preprocess_config: PreprocessConfig):
     train_dataset = tokenized_dataset_train.shuffle(seed=42)
     eval_dataset = tokenized_dataset_val.shuffle(seed=42)
 
-    # small_train_dataset = train_dataset.select(range(50))
-    # small_eval_dataset = eval_dataset.select(range(50))
-
     model = AutoModelForSequenceClassification.from_pretrained(
         "microsoft/codebert-base", num_labels=2
     )
@@ -57,8 +66,7 @@ def train_classifier(preprocess_config: PreprocessConfig):
     # training_args = TrainingArguments(
     #     output_dir="test_trainer", evaluation_strategy="epoch", report_to="none"
     # )
-    # metric = load_metric("accuracy")
-    metric = load_metric("f1", average="weighted")
+    metric = load_metric("accuracy")
 
     training_args = TrainingArguments(
         "test_trainer",
