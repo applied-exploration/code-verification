@@ -29,5 +29,9 @@ def split_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFra
     val_ratio = 0.1
     train, val_test = train_test_split(df, test_size=test_ratio + val_ratio)
     val, test = train_test_split(val_test, test_size=test_ratio)
-    
+
+    train = train.reset_index(drop=True)
+    val = val.reset_index(drop=True)
+    test = test.reset_index(drop=True)
+
     return train, val, test

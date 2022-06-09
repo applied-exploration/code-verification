@@ -7,7 +7,7 @@ from transformers import (
     TrainingArguments,
     Trainer,
 )
-from datasets import load_metric, load_dataset, Dataset
+from datasets import load_metric, load_dataset, Dataset, Features, Value, ClassLabel
 import numpy as np
 
 
@@ -21,14 +21,19 @@ def train_classifier(preprocess_config: PreprocessConfig):
     def tokenize_function(examples):
         return tokenizer(examples["source_code"], padding="max_length", truncation=True)
 
-    train_dataset = Dataset.from_pandas(train)
-    val_dataset = Dataset.from_pandas(val)
+    train_dataset = Dataset.from_pandas(
+        train,
+        features=Features({"source_code": Value("string"), "label": ClassLabel(2)}),
+    )
+    val_dataset = Dataset.from_pandas(
+        val, features=Features({"source_code": Value("string"), "label": ClassLabel(2)})
+    )
 
-    small_train_dataset = train_dataset.map(tokenize_function, batched=True)
-    small_eval_dataset = val_dataset.map(tokenize_function, batched=True)
+    tokenized_dataset_train = train_dataset.map(tokenize_function, batched=True)
+    tokenized_dataset_val = val_dataset.map(tokenize_function, batched=True)
 
-    # small_train_dataset = tokenized_datasets.shuffle(seed=42).select(range(1000))
-    # small_eval_dataset = tokenized_datasets["test"].shuffle(seed=42).select(range(1000))
+    small_train_dataset = tokenized_dataset_train.shuffle(seed=42).select(range(50))
+    small_eval_dataset = tokenized_dataset_val.shuffle(seed=42).select(range(50))
 
     model = AutoModelForSequenceClassification.from_pretrained(
         "microsoft/codebert-base", num_labels=2
@@ -40,8 +45,19 @@ def train_classifier(preprocess_config: PreprocessConfig):
         return metric.compute(predictions=predictions, references=labels)
 
     training_args = TrainingArguments(
-        output_dir="test_trainer", evaluation_strategy="epoch"
+        output_dir="test_trainer", evaluation_strategy="epoch", report_to="none"
     )
+    # TrainingArguments(
+    #         "test_trainer",
+    #         evaluation_strategy="steps",
+    #         eval_steps = 40,
+    #         logging_steps = 40,
+    #         per_device_train_batch_size= 24,
+    #         per_device_eval_batch_size= 24,
+    #         gradient_accumulation_steps=16,
+    #         learning_rate=3e-5,
+    #         prediction_loss_only=True,
+    #     )
     metric = load_metric("accuracy")
 
     trainer = Trainer(
