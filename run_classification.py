@@ -9,17 +9,13 @@ from transformers import (
 )
 from datasets import load_metric, load_dataset, Dataset, Features, Value, ClassLabel
 import numpy as np
+from typing import Tuple
 
 
-def train_classifier(preprocess_config: PreprocessConfig):
+def preporcess_dataset(preprocess_config: PreprocessConfig) -> Tuple[Dataset, Dataset]:
     df = load_data(preprocess_config)
     df = add_negative_cases(df)
     train, val, test = split_data(df)
-
-    tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
-
-    def tokenize_function(examples):
-        return tokenizer(examples["source_code"], padding="max_length", truncation=True)
 
     train_dataset = Dataset.from_pandas(
         train,
@@ -29,11 +25,25 @@ def train_classifier(preprocess_config: PreprocessConfig):
         val, features=Features({"source_code": Value("string"), "label": ClassLabel(2)})
     )
 
+    return train_dataset, val_dataset
+
+
+def train_classifier(preprocess_config: PreprocessConfig):
+    train_dataset, val_dataset = preporcess_dataset(preprocess_config)
+
+    tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
+
+    def tokenize_function(examples):
+        return tokenizer(examples["source_code"], padding="max_length", truncation=True)
+
     tokenized_dataset_train = train_dataset.map(tokenize_function, batched=True)
     tokenized_dataset_val = val_dataset.map(tokenize_function, batched=True)
 
-    small_train_dataset = tokenized_dataset_train.shuffle(seed=42).select(range(50))
-    small_eval_dataset = tokenized_dataset_val.shuffle(seed=42).select(range(50))
+    train_dataset = tokenized_dataset_train.shuffle(seed=42)
+    eval_dataset = tokenized_dataset_val.shuffle(seed=42)
+
+    # small_train_dataset = train_dataset.select(range(50))
+    # small_eval_dataset = eval_dataset.select(range(50))
 
     model = AutoModelForSequenceClassification.from_pretrained(
         "microsoft/codebert-base", num_labels=2
@@ -66,8 +76,8 @@ def train_classifier(preprocess_config: PreprocessConfig):
     trainer = Trainer(
         model=model,
         args=training_args,
-        train_dataset=small_train_dataset,
-        eval_dataset=small_eval_dataset,
+        train_dataset=train_dataset,
+        eval_dataset=eval_dataset,
         compute_metrics=compute_metrics,
     )
 
