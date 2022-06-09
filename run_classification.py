@@ -44,21 +44,24 @@ def train_classifier(preprocess_config: PreprocessConfig):
         predictions = np.argmax(logits, axis=-1)
         return metric.compute(predictions=predictions, references=labels)
 
+    # training_args = TrainingArguments(
+    #     output_dir="test_trainer", evaluation_strategy="epoch", report_to="none"
+    # )
+    # metric = load_metric("accuracy")
+    metric = load_metric("f1", average="weighted")
+
     training_args = TrainingArguments(
-        output_dir="test_trainer", evaluation_strategy="epoch", report_to="none"
+        "test_trainer",
+        evaluation_strategy="steps",
+        eval_steps=40,
+        logging_steps=40,
+        per_device_train_batch_size=24,
+        per_device_eval_batch_size=24,
+        gradient_accumulation_steps=16,
+        learning_rate=3e-5,
+        prediction_loss_only=True,
+        report_to="none",
     )
-    # TrainingArguments(
-    #         "test_trainer",
-    #         evaluation_strategy="steps",
-    #         eval_steps = 40,
-    #         logging_steps = 40,
-    #         per_device_train_batch_size= 24,
-    #         per_device_eval_batch_size= 24,
-    #         gradient_accumulation_steps=16,
-    #         learning_rate=3e-5,
-    #         prediction_loss_only=True,
-    #     )
-    metric = load_metric("accuracy")
 
     trainer = Trainer(
         model=model,
