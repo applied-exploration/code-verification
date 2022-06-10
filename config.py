@@ -10,16 +10,16 @@ class PreprocessConfig:
 
 
 preprocess_config = PreprocessConfig(
-    dataset_size=1000,
+    dataset_size=100,
     batch_size=16,
     force_cpu=True,
     dataset="python-pytorch",
 )
 
+
 @dataclass
 class ClassifyConfig:
     force_cpu: bool
-    
+
+
 classify_config = ClassifyConfig(force_cpu=True)
-
-

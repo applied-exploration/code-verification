@@ -7,20 +7,14 @@ from transformers import (
     TrainingArguments,
     Trainer,
 )
-from datasets import (
-    load_metric,
-    load_dataset,
-    Dataset,
-    Features,
-    Value,
-    ClassLabel,
-    list_metrics,
-)
+from datasets import load_metric, load_dataset, Dataset, Features, Value, ClassLabel
 import numpy as np
 from typing import Tuple
 
 
-def preporcess_dataset(preprocess_config: PreprocessConfig) -> Tuple[Dataset, Dataset]:
+def preporcess_dataset(
+    preprocess_config: PreprocessConfig,
+) -> Tuple[Dataset, Dataset, Dataset]:
     df = load_data(preprocess_config)
     df = add_negative_cases(df)
     train, val, test = split_data(df)
@@ -41,7 +35,7 @@ def preporcess_dataset(preprocess_config: PreprocessConfig) -> Tuple[Dataset, Da
 
 
 def train_classifier(preprocess_config: PreprocessConfig):
-    train_dataset, val_dataset = preporcess_dataset(preprocess_config)
+    train_dataset, val_dataset, test_dataset = preporcess_dataset(preprocess_config)
 
     tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
 
@@ -66,19 +60,20 @@ def train_classifier(preprocess_config: PreprocessConfig):
     # training_args = TrainingArguments(
     #     output_dir="test_trainer", evaluation_strategy="epoch", report_to="none"
     # )
-    metric = load_metric("accuracy")
+    # metric = load_metric("accuracy")
+    metric = load_metric("f1")
 
     training_args = TrainingArguments(
         "test_trainer",
         evaluation_strategy="steps",
-        eval_steps=40,
-        logging_steps=40,
+        eval_steps=1,
+        logging_steps=1,
         per_device_train_batch_size=24,
         per_device_eval_batch_size=24,
         gradient_accumulation_steps=16,
         learning_rate=3e-5,
         prediction_loss_only=True,
-        report_to="none",
+        # report_to="none",
     )
 
     trainer = Trainer(
