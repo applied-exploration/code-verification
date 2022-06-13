@@ -133,3 +133,6 @@ codeparrot-clean/
 data/original/**
 
 data/derived/embeddings_flat.pt
+
+wandb/**
+runs/**
