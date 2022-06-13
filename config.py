@@ -20,6 +20,18 @@ preprocess_config = PreprocessConfig(
 @dataclass
 class ClassifyConfig:
     force_cpu: bool
+    dataset_size: int
+    batch_size: int
+    grad_accum_step: int
+    test_split_ratio: float
+    val_split_ratio: float
 
 
-classify_config = ClassifyConfig(force_cpu=True)
+classify_config = ClassifyConfig(
+    dataset_size=-1,
+    force_cpu=True,
+    batch_size=64,
+    grad_accum_step=1,
+    test_split_ratio=0.1,
+    val_split_ratio=0.1,
+)

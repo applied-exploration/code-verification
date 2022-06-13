@@ -36,7 +36,7 @@ def run_extract_embeddings(config: PreprocessConfig):
         print("| Setting device to cpu...")
         device = -1
 
-    df = load_data(config)
+    df = load_data(config.dataset_size)
 
     print("| Setting up pipeline...")
     pipe = pipeline(

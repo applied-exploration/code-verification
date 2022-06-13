@@ -1,5 +1,5 @@
 from data.data_loader import load_data
-from config import preprocess_config, PreprocessConfig
+from config import ClassifyConfig, classify_config
 from extractors.split_utils import add_negative_cases, split_data
 from transformers import (
     AutoTokenizer,
@@ -7,17 +7,17 @@ from transformers import (
     TrainingArguments,
     Trainer,
 )
-from datasets import load_metric, load_dataset, Dataset, Features, Value, ClassLabel
+from datasets import load_metric, Dataset, Features, Value, ClassLabel
 import numpy as np
 from typing import Tuple
 
 
 def preporcess_dataset(
-    preprocess_config: PreprocessConfig,
+    config: ClassifyConfig,
 ) -> Tuple[Dataset, Dataset, Dataset]:
-    df = load_data(preprocess_config)
+    df = load_data(config.dataset_size)
     df = add_negative_cases(df)
-    train, val, test = split_data(df)
+    train, val, test = split_data(df, config.val_split_ratio, config.test_split_ratio)
 
     train_dataset = Dataset.from_pandas(
         train,
@@ -34,8 +34,8 @@ def preporcess_dataset(
     return train_dataset, val_dataset, test_dataset
 
 
-def train_classifier(preprocess_config: PreprocessConfig):
-    train_dataset, val_dataset, test_dataset = preporcess_dataset(preprocess_config)
+def train_classifier(config: ClassifyConfig):
+    train_dataset, val_dataset, test_dataset = preporcess_dataset(config)
 
     tokenizer = AutoTokenizer.from_pretrained("microsoft/codebert-base")
 
@@ -88,4 +88,4 @@ def train_classifier(preprocess_config: PreprocessConfig):
 
 
 if __name__ == "__main__":
-    train_classifier(preprocess_config)
+    train_classifier(classify_config)
