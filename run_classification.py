@@ -66,8 +66,8 @@ def train_classifier(config: ClassifyConfig):
     training_args = TrainingArguments(
         "test_trainer",
         evaluation_strategy="steps",
-        eval_steps=1,
-        logging_steps=1,
+        eval_steps=config.eval_every,
+        logging_steps=config.eval_every,
         per_device_train_batch_size=config.batch_size,
         per_device_eval_batch_size=config.batch_size,
         gradient_accumulation_steps=config.grad_accum_step,
